@@ -15,20 +15,25 @@ public class Main {
   public static void main(String[] args) throws IOException {
     setUp();
 
-    int[] primeList = getPrimeList();
+    List<Integer> primeList = getPrimeArray(n);
+    int[] prefixSum = new int[primeList.size() + 1];
+    for (int i = 1; i < prefixSum.length; i++) {
+      prefixSum[i] = prefixSum[i - 1] + primeList.get(i - 1);
+    }
+
     int left = 0;
-    int right = 0;
-    int sum = primeList[0];
+    int right = 1;
     int answer = 0;
-    while (right < primeList.length - 1) {
-      if (sum <= n) {
-        if (sum == n) {
-          answer++;
-        }
+
+    while (right < prefixSum.length) {
+      int currSum = prefixSum[right] - prefixSum[left];
+
+      if (currSum == n) {
+        answer++;
         right++;
-        sum += primeList[right];
+      } else if (currSum < n) {
+        right++;
       } else {
-        sum -= primeList[left];
         left++;
       }
     }
@@ -38,31 +43,27 @@ public class Main {
     output();
   }
 
-  private static int[] getPrimeList() {
+  private static List<Integer> getPrimeArray(int n) {
     boolean[] sieve = new boolean[n + 1];
     Arrays.fill(sieve, true);
-    List<Integer> list = new ArrayList<>();
 
-    for (int i = 2; i < n + 1; i++) {
-      if (!sieve[i]) {
-        continue;
-      }
-
-      list.add(i);
-      for (int j = i + i; j < n + 1; j += i) {
-        sieve[j] = false;
+    for (int i = 2; i * i < n + 1; i++) {
+      if (sieve[i]) {
+        for (int j = i * i; j < n + 1; j += i) {
+          sieve[j] = false;
+        }
       }
     }
-    list.add(0);
 
-    int[] result = new int[list.size()];
-    for (int i = 0; i < list.size(); i++) {
-      result[i] = list.get(i);
+    List<Integer> result = new ArrayList<>();
+    for (int i = 2; i < n + 1; i++) {
+      if (sieve[i]) {
+        result.add(i);
+      }
     }
 
     return result;
   }
-
 
   private static void setUp() throws IOException {
     BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
